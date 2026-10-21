@@ -1,0 +1,431 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AutoPrime | Seu próximo carro está aqui{% endblock %}</title>
+    <meta name="description" content="Compre carros novos e seminovos com procedência, garantia e as melhores condições de financiamento.">
+
+    {# Se preferir, mova o CSS abaixo para static/css/vendas.css e use: #}
+    {# <link rel="stylesheet" href="{% static 'css/vendas.css' %}"> #}
+    <style>
+        :root {
+            --cor-primaria: #d62828;
+            --cor-primaria-escura: #a61e1e;
+            --cor-escura: #14181f;
+            --cor-texto: #2b2f36;
+            --cor-suave: #6b7280;
+            --cor-fundo: #f5f6f8;
+            --cor-card: #ffffff;
+            --raio: 12px;
+            --sombra: 0 4px 18px rgba(0, 0, 0, .08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+            color: var(--cor-texto);
+            background: var(--cor-fundo);
+            line-height: 1.6;
+        }
+        img { max-width: 100%; display: block; }
+        a { color: inherit; text-decoration: none; }
+        .container { width: min(1180px, 92%); margin-inline: auto; }
+
+        /* ---------- Botões ---------- */
+        .btn {
+            display: inline-block;
+            padding: 12px 26px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: .2s;
+        }
+        .btn-primario { background: var(--cor-primaria); color: #fff; }
+        .btn-primario:hover { background: var(--cor-primaria-escura); }
+        .btn-contorno { border-color: #fff; color: #fff; }
+        .btn-contorno:hover { background: #fff; color: var(--cor-escura); }
+        .btn-bloco { width: 100%; text-align: center; }
+
+        /* ---------- Cabeçalho ---------- */
+        header {
+            background: var(--cor-escura);
+            color: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .nav { display: flex; align-items: center; justify-content: space-between; height: 70px; }
+        .logo { font-size: 1.6rem; font-weight: 800; letter-spacing: .5px; }
+        .logo span { color: var(--cor-primaria); }
+        .menu { display: flex; gap: 28px; list-style: none; }
+        .menu a { font-weight: 500; opacity: .85; transition: .2s; }
+        .menu a:hover { opacity: 1; color: var(--cor-primaria); }
+
+        /* ---------- Hero ---------- */
+        .hero {
+            background:
+                linear-gradient(120deg, rgba(20,24,31,.92) 35%, rgba(20,24,31,.55)),
+                url("{% static 'img/hero-carro.jpg' %}") center/cover no-repeat,
+                var(--cor-escura);
+            color: #fff;
+            padding: 110px 0 90px;
+        }
+        .hero h1 { font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.15; max-width: 700px; }
+        .hero h1 em { color: var(--cor-primaria); font-style: normal; }
+        .hero p { margin: 18px 0 30px; max-width: 540px; font-size: 1.1rem; opacity: .85; }
+        .hero .acoes { display: flex; gap: 14px; flex-wrap: wrap; }
+
+        /* ---------- Filtros ---------- */
+        .filtros {
+            background: var(--cor-card);
+            margin-top: -45px;
+            position: relative;
+            z-index: 5;
+            border-radius: var(--raio);
+            box-shadow: var(--sombra);
+            padding: 24px;
+        }
+        .filtros form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px;
+            align-items: end;
+        }
+        .campo label { display: block; font-size: .8rem; font-weight: 600; color: var(--cor-suave); margin-bottom: 4px; }
+        .campo input, .campo select, .campo textarea {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #d5d9df;
+            border-radius: 8px;
+            font-size: .95rem;
+            font-family: inherit;
+            background: #fff;
+        }
+        .campo input:focus, .campo select:focus, .campo textarea:focus {
+            outline: 2px solid var(--cor-primaria);
+            border-color: transparent;
+        }
+
+        /* ---------- Seções ---------- */
+        section { padding: 70px 0; }
+        .titulo-secao { text-align: center; margin-bottom: 40px; }
+        .titulo-secao h2 { font-size: 2rem; }
+        .titulo-secao p { color: var(--cor-suave); }
+
+        /* ---------- Cards de carros ---------- */
+        .grade-carros {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 26px;
+        }
+        .card-carro {
+            background: var(--cor-card);
+            border-radius: var(--raio);
+            overflow: hidden;
+            box-shadow: var(--sombra);
+            transition: transform .25s, box-shadow .25s;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-carro:hover { transform: translateY(-6px); box-shadow: 0 10px 28px rgba(0,0,0,.14); }
+        .card-foto { position: relative; aspect-ratio: 16 / 10; background: #e3e6ea; overflow: hidden; }
+        .card-foto img { width: 100%; height: 100%; object-fit: cover; }
+        .selo {
+            position: absolute; top: 12px; left: 12px;
+            background: var(--cor-primaria); color: #fff;
+            font-size: .72rem; font-weight: 700; text-transform: uppercase;
+            padding: 4px 10px; border-radius: 20px;
+        }
+        .card-corpo { padding: 20px; display: flex; flex-direction: column; flex: 1; }
+        .card-corpo h3 { font-size: 1.2rem; }
+        .card-corpo .versao { color: var(--cor-suave); font-size: .9rem; margin-bottom: 12px; }
+        .specs {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px;
+            font-size: .88rem; color: var(--cor-suave);
+            margin-bottom: 16px; padding-bottom: 16px;
+            border-bottom: 1px solid #eceef1;
+        }
+        .preco { font-size: 1.6rem; font-weight: 800; color: var(--cor-primaria); margin-bottom: 14px; margin-top: auto; }
+        .preco small { font-size: .85rem; font-weight: 500; color: var(--cor-suave); }
+
+        .vazio {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 50px 20px;
+            background: var(--cor-card);
+            border-radius: var(--raio);
+            color: var(--cor-suave);
+        }
+
+        /* ---------- Paginação ---------- */
+        .paginacao { display: flex; justify-content: center; gap: 8px; margin-top: 40px; flex-wrap: wrap; }
+        .paginacao a, .paginacao span {
+            padding: 9px 15px; border-radius: 8px; background: var(--cor-card);
+            box-shadow: var(--sombra); font-weight: 600;
+        }
+        .paginacao .atual { background: var(--cor-primaria); color: #fff; }
+
+        /* ---------- Vantagens ---------- */
+        .vantagens { background: var(--cor-card); }
+        .grade-vantagens {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 24px;
+        }
+        .vantagem { text-align: center; padding: 26px 18px; border-radius: var(--raio); background: var(--cor-fundo); }
+        .vantagem .icone { font-size: 2.4rem; margin-bottom: 10px; }
+        .vantagem h3 { margin-bottom: 6px; }
+        .vantagem p { color: var(--cor-suave); font-size: .93rem; }
+
+        /* ---------- Contato ---------- */
+        .contato-wrap {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+            background: var(--cor-escura); color: #fff;
+            border-radius: var(--raio); overflow: hidden;
+        }
+        .contato-info { padding: 44px; }
+        .contato-info h2 { font-size: 1.9rem; margin-bottom: 12px; }
+        .contato-info p { opacity: .8; margin-bottom: 8px; }
+        .contato-form { background: var(--cor-card); color: var(--cor-texto); padding: 44px; display: grid; gap: 14px; }
+
+        .mensagens { list-style: none; margin-bottom: 8px; }
+        .mensagens li { padding: 10px 14px; border-radius: 8px; background: #e6f6ec; color: #166534; font-weight: 600; }
+        .mensagens li.error { background: #fde8e8; color: #991b1b; }
+        .erro-campo { color: #b91c1c; font-size: .8rem; }
+
+        /* ---------- Rodapé ---------- */
+        footer { background: #0c0f14; color: #aab0bb; padding: 34px 0; text-align: center; font-size: .9rem; }
+        footer .logo { color: #fff; margin-bottom: 8px; display: block; }
+
+        /* ---------- WhatsApp ---------- */
+        .whats {
+            position: fixed; right: 20px; bottom: 20px; z-index: 60;
+            background: #25d366; color: #fff; padding: 14px 20px;
+            border-radius: 50px; font-weight: 700; box-shadow: 0 6px 18px rgba(0,0,0,.25);
+        }
+
+        /* ---------- Responsivo ---------- */
+        @media (max-width: 820px) {
+            .menu { display: none; }
+            .contato-wrap { grid-template-columns: 1fr; }
+            .contato-info, .contato-form { padding: 30px 24px; }
+            .hero { padding: 80px 0 70px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== CABEÇALHO ========== -->
+    <header>
+        <div class="container nav">
+            <a href="/" class="logo">Auto<span>Prime</span></a>
+            <ul class="menu">
+                <li><a href="#estoque">Estoque</a></li>
+                <li><a href="#vantagens">Vantagens</a></li>
+                <li><a href="#contato">Contato</a></li>
+            </ul>
+            <a href="#contato" class="btn btn-primario">Fale conosco</a>
+        </div>
+    </header>
+
+    <!-- ========== HERO ========== -->
+    <div class="hero">
+        <div class="container">
+            <h1>Encontre o carro <em>perfeito</em> para o seu estilo de vida</h1>
+            <p>Novos e seminovos com procedência garantida, laudo cautelar e as melhores condições de financiamento.</p>
+            <div class="acoes">
+                <a href="#estoque" class="btn btn-primario">Ver estoque</a>
+                <a href="#contato" class="btn btn-contorno">Simular financiamento</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== FILTROS (GET) ========== -->
+    <div class="container">
+        <div class="filtros">
+            <form method="get" action="#estoque">
+                <div class="campo">
+                    <label for="q">Marca ou modelo</label>
+                    <input type="text" id="q" name="q" value="{{ request.GET.q }}" placeholder="Ex.: Corolla">
+                </div>
+                <div class="campo">
+                    <label for="combustivel">Combustível</label>
+                    <select id="combustivel" name="combustivel">
+                        <option value="">Todos</option>
+                        <option value="flex"     {% if request.GET.combustivel == 'flex' %}selected{% endif %}>Flex</option>
+                        <option value="gasolina" {% if request.GET.combustivel == 'gasolina' %}selected{% endif %}>Gasolina</option>
+                        <option value="diesel"   {% if request.GET.combustivel == 'diesel' %}selected{% endif %}>Diesel</option>
+                        <option value="eletrico" {% if request.GET.combustivel == 'eletrico' %}selected{% endif %}>Elétrico</option>
+                        <option value="hibrido"  {% if request.GET.combustivel == 'hibrido' %}selected{% endif %}>Híbrido</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="cambio">Câmbio</label>
+                    <select id="cambio" name="cambio">
+                        <option value="">Todos</option>
+                        <option value="manual"      {% if request.GET.cambio == 'manual' %}selected{% endif %}>Manual</option>
+                        <option value="automatico"  {% if request.GET.cambio == 'automatico' %}selected{% endif %}>Automático</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="preco_max">Preço máximo (R$)</label>
+                    <input type="number" id="preco_max" name="preco_max" min="0" step="1000" value="{{ request.GET.preco_max }}" placeholder="100000">
+                </div>
+                <button type="submit" class="btn btn-primario">Buscar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== ESTOQUE ========== -->
+    <section id="estoque">
+        <div class="container">
+            <div class="titulo-secao">
+                <h2>Nosso estoque</h2>
+                <p>{{ total_carros }} veículo{{ total_carros|pluralize }} disponíve{{ total_carros|pluralize:"l,is" }}</p>
+            </div>
+
+            <div class="grade-carros">
+                {% for carro in carros %}
+                <article class="card-carro">
+                    <div class="card-foto">
+                        {% if carro.foto %}
+                            <img src="{{ carro.foto.url }}" alt="{{ carro.marca }} {{ carro.modelo }}" loading="lazy">
+                        {% else %}
+                            <img src="{% static 'img/sem-foto.jpg' %}" alt="Sem foto disponível" loading="lazy">
+                        {% endif %}
+                        {% if carro.destaque %}<span class="selo">Destaque</span>{% endif %}
+                    </div>
+                    <div class="card-corpo">
+                        <h3>{{ carro.marca }} {{ carro.modelo }}</h3>
+                        <p class="versao">{{ carro.versao|default:"" }}</p>
+
+                        <div class="specs">
+                            <span>📅 {{ carro.ano }}</span>
+                            <span>🛣️ {{ carro.quilometragem|floatformat:"0g" }} km</span>
+                            <span>⛽ {{ carro.get_combustivel_display }}</span>
+                            <span>⚙️ {{ carro.get_cambio_display }}</span>
+                        </div>
+
+                        <p class="preco">R$ {{ carro.preco|floatformat:"2g" }}</p>
+                        <a href="{{ carro.get_absolute_url }}" class="btn btn-primario btn-bloco">Ver detalhes</a>
+                    </div>
+                </article>
+                {% empty %}
+                <div class="vazio">
+                    <h3>Nenhum veículo encontrado 😕</h3>
+                    <p>Tente ajustar os filtros ou volte mais tarde — estamos sempre renovando o estoque.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Paginação (mantém os filtros ativos via "querystring" da view) -->
+            {% if page_obj.has_other_pages %}
+            <nav class="paginacao" aria-label="Paginação">
+                {% if page_obj.has_previous %}
+                    <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}#estoque">&laquo; Anterior</a>
+                {% endif %}
+                <span class="atual">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                {% if page_obj.has_next %}
+                    <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}#estoque">Próxima &raquo;</a>
+                {% endif %}
+            </nav>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- ========== VANTAGENS ========== -->
+    <section class="vantagens" id="vantagens">
+        <div class="container">
+            <div class="titulo-secao">
+                <h2>Por que comprar na AutoPrime?</h2>
+                <p>Mais segurança e tranquilidade em cada negociação.</p>
+            </div>
+            <div class="grade-vantagens">
+                <div class="vantagem">
+                    <div class="icone">🛡️</div>
+                    <h3>Garantia estendida</h3>
+                    <p>Todos os veículos passam por revisão completa e saem com garantia.</p>
+                </div>
+                <div class="vantagem">
+                    <div class="icone">📄</div>
+                    <h3>Laudo cautelar</h3>
+                    <p>Procedência verificada e documentação 100% regularizada.</p>
+                </div>
+                <div class="vantagem">
+                    <div class="icone">💳</div>
+                    <h3>Financiamento facilitado</h3>
+                    <p>Parcelas que cabem no bolso, com aprovação rápida.</p>
+                </div>
+                <div class="vantagem">
+                    <div class="icone">🔁</div>
+                    <h3>Aceitamos seu usado</h3>
+                    <p>Avaliação justa do seu carro na troca por um novo.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== CONTATO ========== -->
+    <section id="contato">
+        <div class="container">
+            <div class="contato-wrap">
+                <div class="contato-info">
+                    <h2>Fale com um consultor</h2>
+                    <p>Tem interesse em algum veículo ou quer simular um financiamento? Envie sua mensagem.</p>
+                    <br>
+                    <p>📍 Rua Exemplo, 123 — Centro</p>
+                    <p>📞 (71) 99999-9999</p>
+                    <p>✉️ contato@autoprime.com.br</p>
+                    <p>🕗 Seg a Sáb, das 8h às 18h</p>
+                </div>
+
+                <form class="contato-form" method="post" action="{% url 'contato' %}">
+                    {% csrf_token %}
+
+                    {% if messages %}
+                    <ul class="mensagens">
+                        {% for message in messages %}
+                            <li class="{{ message.tags }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+
+                    <div class="campo">
+                        <label for="nome">Nome</label>
+                        <input type="text" id="nome" name="nome" required>
+                    </div>
+                    <div class="campo">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="campo">
+                        <label for="telefone">Telefone / WhatsApp</label>
+                        <input type="tel" id="telefone" name="telefone" required>
+                    </div>
+                    <div class="campo">
+                        <label for="mensagem">Mensagem</label>
+                        <textarea id="mensagem" name="mensagem" rows="4" placeholder="Qual carro você procura?"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primario">Enviar mensagem</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== RODAPÉ ========== -->
+    <footer>
+        <div class="container">
+            <span class="logo">Auto<span style="color:var(--cor-primaria)">Prime</span></span>
+            <p>&copy; {% now "Y" %} AutoPrime Veículos. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <a class="whats" href="https://wa.me/5571999999999?text=Ol%C3%A1!%20Vi%20um%20carro%20no%20site%20e%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es." target="_blank" rel="noopener">💬 WhatsApp</a>
+
+</body>
+</html>
